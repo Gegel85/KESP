@@ -1,9 +1,13 @@
 # GDD
 
 **Title:** Koishi Eyes Shut Paradigm (KESP)
+
 **Platform:** Gameboy color (emulation)
+
 **Genre:** Platformer
+
 **Target:** General public (3+)
+
 
 ## Concept
 The concept is to create a small-sized platformer which will blend both action and puzzle elements through the readapted mechanic of Ikaruga.
@@ -31,24 +35,31 @@ Data storage is handled by the GBC emulator.
 ## GAMEPLAY
 ### Basic mechanics
 - Health: 3 hearts, if you get hit 3 times you die
-- Hearts: Recovers your health by a point
-- Eyes: Mario coins (?)
+- Eyes: bait (?)
 
 ### Unique mechanic: Dimension-shift
-- In the open-eyed dimension, both spiritual enemies and spiritual platforms are tangible.
--  In the closed-eyed dimension,
-1. spiritual entities are not visible (?) nor tangible, but you can only stay in this dimension for a second, as Koishi is scared. It serves as a pseudo invulnerable state to spiritual entities. 
-2. spiritual entities are frozen in time, but your view of the field does not update since Koishi has her eyes closed.
-3. Koishi blinks for up to half a second (which you can hold manually), in which you can see nothing at all (or world vision does not update), and spiritual entities are not tangible
-// open and closed dimensions can be reversed if need be
-- In any of these dimensions, physical platforms are tangible and can hurt you.
+Koishi can close her eyes to acces the spiritual world. She can turn back anytime to the real world by opening her eyes.
+- __Real world:__ You cannot interact with spiritual entities, but you cannot go through real-world entities.
+- __Spiritual world:__ You will become intangible to real world hazards, however monters will come at you. Spiritual platforms and items will become available.
+
+With an item, you could bait monsters elsewhere while you are eyes closed.
+
+With an item, you could freeze time while eyes closed.
+
 
 ### Controls
-up: look up
+up: Close eyes
+
 right: right
+
 left: left
+
 down: go through platform
-A: Jump
-B: Action (depends on the nearby object)
+
+A: Action (depends on the nearby object)
+
+B: Jump
+
 Start: pause
-Select: Close eyes
+
+Select: 
