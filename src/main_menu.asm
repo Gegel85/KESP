@@ -1,0 +1,4 @@
+mainMenu::
+
+.loop:
+	jp inGame
