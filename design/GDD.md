@@ -46,6 +46,15 @@ With an item, you could bait monsters elsewhere while you are eyes closed.
 
 With an item, you could freeze time while eyes closed.
 
+### Obstacles
+- Regular terrain, tangible in both worlds
+- Regular objects (heavy doors, some actionable objects)
+
+- Real enemies, only tangible in the real world
+- Spiritual enemies, only tangible in the spiritual world
+
+- Real objects (keys)
+- Spiritual objects (?)
 
 ### Controls
 up: Close eyes
