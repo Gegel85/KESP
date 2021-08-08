@@ -48,6 +48,14 @@ COLORED_IMGS = \
 	assets/koishi/eyeclosed0.png \
 	assets/koishi/eyeclosed1.png \
 	assets/koishi/eyeclosing.png \
+	assets/koishi/jump01.png \
+	assets/koishi/jump11.png \
+	assets/koishi/jump01closed.png \
+	assets/koishi/jump11closed.png \
+	assets/koishi/jump02.png \
+	assets/koishi/jump12.png \
+	assets/koishi/jump03.png \
+	assets/koishi/jump13.png \
 
 COMPLEX_COLORED_IMGS =
 

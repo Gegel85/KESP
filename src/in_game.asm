@@ -1,9 +1,16 @@
-drawPlayer::
+updatePlayerSprite::
 	ld hl, oamSrc
 	ld a, [playerPosX]
 	ld b, a
 	ld a, [playerPosY]
 	ld c, a
+
+	ld a, [playerState]
+	and STATE_FACE_RIGHT
+	ld d, 8
+	jr z, .right
+	ld d, 0
+.right::
 
 	ld a, [playerState]
 	and STATE_OPENING
@@ -23,10 +30,14 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $8
+	add d
 	ld [hli], a
 	ld a, 1
 	ld [hli], a
-	inc a
+	ld a, d
+	rla
+	rla
+	or 2
 	ld [hli], a
 
 	; 10
@@ -35,9 +46,14 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $10
+	sub d
 	ld [hli], a
 	ld a, 2
 	ld [hli], a
+	ld a, d
+	rla
+	rla
+	or 2
 	ld [hli], a
 
 	; 01
@@ -46,15 +62,37 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $8
+	add d
 	ld [hli], a
+
 	ld a, [playerState]
-	and STATE_CLOSED
+	and STATE_OPENING
+	ld a, 3
+	jr nz, .01draw
+
+	ld a, [playerState]
+	and STATE_EYE_CLOSED | STATE_JUMPING
+	ld e, a
 	ld a, 3
 	jr z, .01draw
+
+	ld a, STATE_EYE_CLOSED | STATE_JUMPING
+	cp e
+	ld a, $16
+	jr z, .01draw
+
+	ld a, STATE_EYE_CLOSED
+	and e
 	ld a, 13
+	jr nz, .01draw
+
+	ld a, $10
 .01draw::
 	ld [hli], a
-	ld a, 1
+	ld a, d
+	rla
+	rla
+	inc a
 	ld [hli], a
 
 	; 11
@@ -63,31 +101,62 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $10
-	ld [hli], a
-	ld a, [playerState]
-	and STATE_CLOSED
-	ld a, 14
-	jr nz, .11draw
-	ld a, [playerState]
-	and STATE_OPENING
-	ld a, 4
-	jr z, .11draw
-	ld a, 15
-.11draw::
-	ld [hli], a
-	ld a, 1
+	sub d
 	ld [hli], a
 
+	ld a, [playerState]
+	and STATE_OPENING
+	ld a, 15
+	jr nz, .11draw
+
+	ld a, [playerState]
+	and STATE_EYE_CLOSED | STATE_JUMPING
+	ld e, a
+	ld a, 4
+	jr z, .11draw
+
+	ld a, STATE_EYE_CLOSED | STATE_JUMPING
+	cp e
+	ld a, $17
+	jr z, .11draw
+
+	ld a, STATE_EYE_CLOSED
+	and e
+	ld a, $E
+	jr nz, .11draw
+
+	ld a, $11
+.11draw::
+	ld [hli], a
+	ld a, d
+	rla
+	rla
+	inc a
+	ld [hli], a
+
+	ld a, [playerState]
+	and STATE_JUMPING
+	jr z, .draw02
+	dec c
+.draw02:
 	; 02
 	ld a, c
 	add $20
 	ld [hli], a
 	ld a, b
 	add $8
+	add d
 	ld [hli], a
+	ld a, [playerState]
+	and STATE_JUMPING
 	ld a, 5
+	jr z, .02draw
+	ld a, $12
+.02draw:
 	ld [hli], a
-	xor a
+	ld a, d
+	rla
+	rla
 	ld [hli], a
 
 	; 12
@@ -96,10 +165,18 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $10
+	sub d
 	ld [hli], a
+	ld a, [playerState]
+	and STATE_JUMPING
 	ld a, 6
+	jr z, .12draw
+	ld a, $13
+.12draw:
 	ld [hli], a
-	xor a
+	ld a, d
+	rla
+	rla
 	ld [hli], a
 
 	; 03
@@ -108,20 +185,33 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $8
+	add d
+	push de
 	ld d, a
 	ld e, 7
+
 	ld a, [playerState]
 	and STATE_OPENING
 	jr nz, .keepCopyLastX
+
+	ld a, [playerState]
+	and STATE_JUMPING
+	ld e, $14
+	jr nz, .keepCopyLastX
+
+	ld e, 7
 	ld a, [playerState]
 	and STATE_WALKING
 	jr z, .keepCopyLastX
+
 	ld a, [playerAnim]
 	and 1
 	jr nz, .keepCopyLastX
+
 	ld a, [playerAnim]
 	and 2
 	jr nz, .animFrame2X
+
 	ld e, 9
 	jr .keepCopyLastX
 .animFrame2X::
@@ -131,7 +221,11 @@ drawPlayer::
 	ld [hli], a
 	ld a, e
 	ld [hli], a
-	ld a, 1
+	pop de
+	ld a, d
+	rla
+	rla
+	inc a
 	ld [hli], a
 
 	; 13
@@ -140,11 +234,19 @@ drawPlayer::
 	ld [hli], a
 	ld a, b
 	add $10
+	sub d
+	push de
 	ld d, a
 	ld e, 8
 	ld a, [playerState]
 	and STATE_OPENING
 	jr nz, .keepCopyLastY
+
+	ld a, [playerState]
+	and STATE_JUMPING
+	ld e, $15
+	jr nz, .keepCopyLastY
+	ld e, 8
 
 	ld a, [playerState]
 	and STATE_WALKING
@@ -167,7 +269,11 @@ drawPlayer::
 	ld [hli], a
 	ld a, e
 	ld [hli], a
-	ld a, 1
+	pop de
+	ld a, d
+	rla
+	rla
+	inc a
 	ld [hli], a
 	ret
 
@@ -182,6 +288,98 @@ updatePlayer::
 	inc a
 	ld [playerAnim], a
 .noAnimChange:
+	ld hl, playerState
+	ld a, [hli]
+	and STATE_OPENING
+	jr nz, .checkClosingOpening
+	ld hl, playerSpeedY + 1
+
+	ld a, [hl]
+	ld c, a
+	add $40
+	ld [hld], a
+	ld a, [hl]
+	ld b, a
+	adc 0
+	ld [hld], a
+
+	ld a, [hld]
+	ld e, a
+	ld a, [hl]
+	push hl
+	ld l, e
+	ld h, a
+	add hl, bc
+	ld b, h
+	ld c, l
+	pop hl
+	ld a, b
+	ld [hli], a
+	ld [hl], c
+
+	ld hl, playerSpeedX + 1
+	ld a, [hld]
+	ld c, a
+	ld a, [hld]
+	ld b, a
+	ld a, [hld]
+	ld e, a
+	ld a, [hl]
+	push hl
+	ld l, e
+	ld h, a
+	add hl, bc
+	ld b, h
+	ld c, l
+	pop hl
+	ld a, b
+	ld [hli], a
+	ld [hl], c
+	jr .checkCollisions
+
+.checkClosingOpening::
+	ld a, [hld]
+	cp 4
+	jr nz, .checkCollisions
+	ld a, [hl]
+	xor STATE_EYE_CLOSED | STATE_OPENING
+	ld [hli], a
+	xor a
+	ld [hli], a
+	ld [hli], a
+
+.checkCollisions::
+	ld a, [playerState]
+	or STATE_JUMPING
+	ld [playerState], a
+	ld hl, playerPosY
+	ld a, [hl]
+	cp 144 - 32
+	jr c, .end
+
+	ld a, 144 - 32
+	ld [hli], a
+	xor a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+
+	ld hl, playerSpeedX
+	ld [hli], a
+	ld [hli], a
+
+	ld a, [playerState]
+	and ~STATE_JUMPING
+	ld [playerState], a
+
+.end:
+	ret
+
+
+preparePlayer::
+	ld a, [playerState]
+	and STATE_JUMPING | STATE_EYE_CLOSED | STATE_OPENING | STATE_FACE_RIGHT | STATE_WALKING
+	ld [playerState], a
 	ret
 
 
@@ -189,7 +387,7 @@ inGame::
 	call waitVBLANK
 	reset lcdCtrl
 	ld hl, koishi
-	ld bc, $10 * 15
+	ld bc, $10 * $17
 	ld de, VRAMStart + $10
 	call copyMemory
 
@@ -212,9 +410,151 @@ inGame::
 
 	reg playerState, 1
 .loop:
+	ld hl, lcdLine
+	ld a, $90 - 1
+.halt::
 	halt
-	call updatePlayer
-	call drawPlayer
-	call getKeys
+	cp [hl]
+	jr nc, .halt
+.rendering::
 
+
+.update:
+	call updatePlayer
+	call updatePlayerSprite
+
+	call preparePlayer
+	call getKeys
+	bit RIGHT_BIT, a
+	call z, .right
+
+	bit LEFT_BIT, a
+	call z, .left
+
+	bit DOWN_BIT, a
+	call z, .down
+
+	bit A_BIT, a
+	call z, .a
+
+	bit B_BIT, a
+	call z, .b
+
+	bit SELECT_BIT, a
+	call z, .select
+
+	bit START_BIT, a
+	call z, .start
+
+	ld hl, playerState
+	ld a, [hl]
+	and STATE_WALK_REQUEST
+	jr nz, .loop
+	ld a, [hl]
+	and ~STATE_WALKING
+	ld [hl], a
 	jr .loop
+
+.right:
+	; Right
+	push af
+	ld a, [playerState]
+	and STATE_JUMPING
+	jr nz, .reduceLeftMomentum
+
+	ld a, [playerState]
+	and STATE_OPENING
+	jr nz, .leftEnd
+	ld a, 1
+	ld [playerSpeedX], a
+	ld a, [playerState]
+	or STATE_FACE_RIGHT
+	jr .walk
+
+.reduceLeftMomentum::
+	pop af
+	ret
+
+.left:
+	; Left
+	push af
+	ld a, [playerState]
+	and STATE_JUMPING
+	jr nz, .reduceRightMomentum
+	ld a, [playerState]
+	and STATE_OPENING
+	jr nz, .leftEnd
+	ld hl, playerSpeedX
+	ld a, -1
+	ld [playerSpeedX], a
+	ld a, [playerState]
+	and ~STATE_FACE_RIGHT
+	jr .walk
+
+.reduceRightMomentum::
+	pop af
+	ret
+
+.walk:
+	or STATE_WALK_REQUEST
+	ld c, a
+	or STATE_WALKING
+	ld [playerState], a
+	ld a, STATE_WALKING
+	and c
+	jr nz, .leftEnd
+	ld [playerAnim], a
+	ld [playerAnimCtr], a
+.leftEnd:
+	pop af
+	ret
+
+.down:
+	; Go through platform
+	ret
+
+.a:
+	; Jump
+	push af
+	ld a, [playerState]
+	and STATE_JUMPING
+	jr z, .aNew
+	ld a, [playerAnim]
+	or a
+	jr z, .aOK
+	pop af
+	ret
+.aNew::
+	ld hl, playerAnim
+	xor a
+	ld [hli], a
+	ld [hli], a
+.aOK::
+	reg playerSpeedY, $FD
+	pop af
+	ret
+
+.b:
+	; Run/Action (depends on the nearby object)
+	ret
+
+.start:
+	; Pause
+	ret
+
+.select:
+	; Close eyes
+	push af
+	ld hl, playerState
+	ld a, [hl]
+	and STATE_OPENING
+	jr nz, .selectEnd
+	ld a, [hl]
+	or STATE_OPENING
+	ld [hli], a
+	xor a
+	ld [hli], a
+	ld [hl], a
+.selectEnd:
+	pop af
+	ret

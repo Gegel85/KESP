@@ -33,16 +33,14 @@ nbRepeated::
 	ds $1
 
 ; Game stuff
-playerPos::
 playerPosX::
-	ds $1
-playerPosY::
-	ds $1
-playerSpeed::
+	ds $2
 playerSpeedX::
-	ds $1
+	ds $2
+playerPosY::
+	ds $2
 playerSpeedY::
-	ds $1
+	ds $2
 playerState::
 	ds $1
 playerAnim::
