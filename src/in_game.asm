@@ -425,6 +425,7 @@ inGame::
 
 	call preparePlayer
 	call getKeys
+
 	bit RIGHT_BIT, a
 	call z, .right
 
@@ -464,7 +465,7 @@ inGame::
 
 	ld a, [playerState]
 	and STATE_OPENING
-	jr nz, .leftEnd
+	jr nz, .retRight
 	ld a, 1
 	ld [playerSpeedX], a
 	ld a, [playerState]
@@ -472,6 +473,30 @@ inGame::
 	jr .walk
 
 .reduceLeftMomentum::
+	ld hl, playerSpeedX + 1
+	ld a, [hld]
+	ld c, a
+	ld b, [hl]
+	bit 7, b
+	jr nz, .allGoodRight
+	ld a, 2
+	cp b
+	jr nz, .allGoodRight
+	jr c, .retRight
+	xor a
+	or c
+	jr nz, .allGoodRight
+.retRight::
+	pop af
+	ret
+.allGoodRight::
+	ld a, c
+	add $10
+	ld c, a
+	ld a, b
+	adc 0
+	ld [hli], a
+	ld [hl], c
 	pop af
 	ret
 
@@ -492,6 +517,29 @@ inGame::
 	jr .walk
 
 .reduceRightMomentum::
+	ld hl, playerSpeedX + 1
+	ld a, [hld]
+	ld c, a
+	ld b, [hl]
+	bit 7, b
+	jr z, .allGood
+	ld a, $FE
+	cp b
+	jr c, .allGood
+	jr nz, .leftEnd
+	xor a
+	or c
+	jr nz, .allGood
+	pop af
+	ret
+.allGood::
+	ld a, c
+	sub $10
+	ld c, a
+	ld a, b
+	sbc 0
+	ld [hli], a
+	ld [hl], c
 	pop af
 	ret
 
@@ -549,6 +597,10 @@ inGame::
 	ld a, [hl]
 	and STATE_OPENING
 	jr nz, .selectEnd
+	ld a, [hl]
+	and STATE_JUMPING
+	jr nz, .selectEnd
+
 	ld a, [hl]
 	or STATE_OPENING
 	ld [hli], a

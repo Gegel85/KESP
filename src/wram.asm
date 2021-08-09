@@ -49,6 +49,14 @@ playerAnimCtr::
 	ds $1
 
 
+mapWidth::
+	ds $1
+mapHeight::
+	ds $1
+mapNbObjects::
+	ds $1
+mapObjects::
+	ds $20 * $5
 
 SECTION "AUDIO_REGISTERS_MIRROR", WRAM0[$C410]
 Channel1Mirror::
@@ -69,3 +77,19 @@ oamSrc::
 stackTop::
 	ds $C800 - stackTop
 stackBottom::
+
+SECTION "LoadedMapPart1", WRAMX[$D000], BANK[1]
+loadedMapPart1::
+	ds $1000
+
+SECTION "LoadedMapPart2", WRAMX[$D000], BANK[2]
+loadedMapPart2::
+	ds $1000
+
+SECTION "LoadedMapPart3", WRAMX[$D000], BANK[3]
+loadedMapPart3::
+	ds $1000
+
+SECTION "LoadedMapPart4", WRAMX[$D000], BANK[4]
+loadedMapPart4::
+	ds $1000
