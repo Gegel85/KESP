@@ -20,11 +20,14 @@ FX = rgbgfx
 
 SRCS = \
 	src/main.asm \
+	src/maps/maps.asm \
 	src/mem_layout.asm \
 	src/assets.asm \
 	src/text.asm \
 	src/wram.asm
 
+MAPSTXT = \
+	src/maps/A1-1.txt \
 
 IMGS = \
 	assets/nocgberror.png
@@ -48,6 +51,17 @@ COLORED_IMGS = \
 	assets/koishi/eyeclosed0.png \
 	assets/koishi/eyeclosed1.png \
 	assets/koishi/eyeclosing.png \
+	assets/koishi/jump01.png \
+	assets/koishi/jump11.png \
+	assets/koishi/jump01closed.png \
+	assets/koishi/jump11closed.png \
+	assets/koishi/jump02.png \
+	assets/koishi/jump12.png \
+	assets/koishi/jump03.png \
+	assets/koishi/jump13.png \
+	assets/spritesheets/hellGround.png \
+	assets/spritesheets/wisp.png \
+	assets/spritesheets/eye.png \
 
 COMPLEX_COLORED_IMGS =
 
@@ -61,6 +75,8 @@ COMPRESSED_COLORED_IMGS =
 OBJS = $(SRCS:%.asm=%.o)
 
 IMGSFX = $(IMGS:%.png=%.fx)
+
+MAPSFX = $(MAPSTXT:%.txt=%.map)
 
 COMPRESSEDIMGSFX = $(COMPRESSED_IMGS:%.png=%.zfx)
 
@@ -78,7 +94,7 @@ PALS = $(COLORED_IMGS:%.png=%.pal) $(COMPRESSED_COLORED_IMGS:%.png=%.pal) $(OBJ_
 
 MAPS = $(IMGS:%.png=%.tilemap) $(COMPRESSED_IMGS:%.png=%.tilemap) $(COLORED_IMGS:%.png=%.tilemap) $(COMPRESSED_COLORED_IMGS:%.png=%.tilemap) $(OBJ_COLORED_IMGS:%.png=%.tilemap)
 
-all:	tools/compressor tools/fixObjPals tools/gbc_converter $(NAME).$(EXT)
+all:	tools/compressor tools/fixObjPals tools/gbc_converter tools/map_converter $(NAME).$(EXT)
 
 tools/compressor:
 	$(MAKE) -C tools compressor
@@ -89,11 +105,17 @@ tools/fixObjPals:
 tools/gbc_converter:
 	$(MAKE) -C tools gbc_converter
 
+tools/map_converter:
+	$(MAKE) -C tools map_converter
+
 run:	re
 	wine "$(BGB_PATH)" ./$(NAME).gbc
 
 runw:	re
 	"$(BGB_PATH)" ./$(NAME).gbc
+
+%.map : %.txt
+	tools/map_converter $< $@
 
 %.fx : %.png
 	$(FX) $(FXFLAGS) -T -o $@ $<
@@ -121,13 +143,13 @@ runw:	re
 %.o : %.asm
 	$(ASM) -o $@ $(ASMFLAGS) $<
 
-$(NAME).$(EXT): $(COLORED_IMGS_FX) $(COMPRESSED_COLORED_IMGS_FX) $(OBJ_COLORED_IMGS_FX) $(COMPRESSEDIMGSFX) $(IMGSFX) $(OBJ_COLORED_IMGS_FX) $(COMPLEX_COLORED_IMGS_FX) $(OPTIMIZED_COLORED_IMGS_FX) $(OBJS)
+$(NAME).$(EXT): $(MAPSFX) $(COLORED_IMGS_FX) $(COMPRESSED_COLORED_IMGS_FX) $(OBJ_COLORED_IMGS_FX) $(COMPRESSEDIMGSFX) $(IMGSFX) $(OBJ_COLORED_IMGS_FX) $(COMPLEX_COLORED_IMGS_FX) $(OPTIMIZED_COLORED_IMGS_FX) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 	$(FIX) $(FIXFLAGS) $@
 
 clean:
 	$(MAKE) -C tools clean
-	$(RM) $(OBJS) $(IMGSFX) $(COMPRESSEDIMGSFX) $(COLORED_IMGS_FX) $(COMPRESSED_COLORED_IMGS_FX) $(MAPS) $(PALS) $(OBJ_COLORED_IMGS_FX) $(OBJ_COLORED_IMGS:%.png=%.ofo) $(COMPLEX_COLORED_IMGS_FX) $(COMPLEX_COLORED_IMGS_FX:%.ccfx=%.pal) $(COMPLEX_COLORED_IMGS_FX:%.ccfx=%.attrmap) $(COMPLEX_COLORED_IMGS_FX:%.ccfx=%.tilemap)
+	$(RM) $(OBJS) $(MAPSFX) $(IMGSFX) $(COMPRESSEDIMGSFX) $(COLORED_IMGS_FX) $(COMPRESSED_COLORED_IMGS_FX) $(MAPS) $(PALS) $(OBJ_COLORED_IMGS_FX) $(OBJ_COLORED_IMGS:%.png=%.ofo) $(COMPLEX_COLORED_IMGS_FX) $(COMPLEX_COLORED_IMGS_FX:%.ccfx=%.pal) $(COMPLEX_COLORED_IMGS_FX:%.ccfx=%.attrmap) $(COMPLEX_COLORED_IMGS_FX:%.ccfx=%.tilemap)
 
 fclean:	clean
 	$(MAKE) -C tools fclean
