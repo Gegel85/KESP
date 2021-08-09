@@ -33,16 +33,14 @@ nbRepeated::
 	ds $1
 
 ; Game stuff
-playerPos::
 playerPosX::
-	ds $1
-playerPosY::
-	ds $1
-playerSpeed::
+	ds $2
 playerSpeedX::
-	ds $1
+	ds $2
+playerPosY::
+	ds $2
 playerSpeedY::
-	ds $1
+	ds $2
 playerState::
 	ds $1
 playerAnim::
@@ -51,6 +49,14 @@ playerAnimCtr::
 	ds $1
 
 
+mapWidth::
+	ds $1
+mapHeight::
+	ds $1
+mapNbObjects::
+	ds $1
+mapObjects::
+	ds $20 * $5
 
 SECTION "AUDIO_REGISTERS_MIRROR", WRAM0[$C410]
 Channel1Mirror::
@@ -71,3 +77,19 @@ oamSrc::
 stackTop::
 	ds $C800 - stackTop
 stackBottom::
+
+SECTION "LoadedMapPart1", WRAMX[$D000], BANK[1]
+loadedMapPart1::
+	ds $1000
+
+SECTION "LoadedMapPart2", WRAMX[$D000], BANK[2]
+loadedMapPart2::
+	ds $1000
+
+SECTION "LoadedMapPart3", WRAMX[$D000], BANK[3]
+loadedMapPart3::
+	ds $1000
+
+SECTION "LoadedMapPart4", WRAMX[$D000], BANK[4]
+loadedMapPart4::
+	ds $1000

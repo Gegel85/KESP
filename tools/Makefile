@@ -25,6 +25,9 @@ $(NAME):$(OBJ)
 fixObjPals:fixObjPals.o
 	$(CC) -o fixObjPals fixObjPals.o $(LDFLAGS)
 
+map_converter: map_converter.o
+	$(CC) -o map_converter map_converter.o $(LDFLAGS)
+
 gbc_converter:gbc_converter.o
 	$(CC) -o gbc_converter gbc_converter.o $(LDFLAGS) -lpng
 
@@ -32,7 +35,7 @@ clean:
 	$(RM) $(OBJ) fixObjPals.o gbc_converter.o
 
 fclean:	clean
-	$(RM) $(NAME) $(NAME).exe fixObjPals fixObjPals.exe gbc_converter gbc_converter.exe
+	$(RM) $(NAME) $(NAME).exe fixObjPals fixObjPals.exe gbc_converter gbc_converter.exe map_converter map_converter.exe
 
 ffclean:fclean
 
