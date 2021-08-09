@@ -181,20 +181,22 @@ bool convertStream(FILE *in, const char *output)
 		if (!strchr("0123456789abcdefghijklmnopqrstuvwxyz ", data[i])) {
 			if (c) {
 				fwrite(&number, 1, 1, out);
-				if (c < '9')
-					c -= '0';
+				if (c == ' ')
+					c = 0;
+				else if (c < '9')
+					c -= '0' - 1;
 				else
-					c -= 'a' - 10;
-				c |= 0x80U;
+					c -= 'a' - 11;
 				fwrite(&c, 1, 1, out);
 			}
 			number = 0;
 			c = data[i];
-			if (c < '9')
-				c -= '0';
+			if (c == ' ')
+				c = 0;
+			else if (c < '9')
+				c -= '0' - 1;
 			else
-				c -= 'a' - 10;
-			c |= 0x80U;
+				c -= 'a' - 11;
 			fwrite(&c, 1, 1, out);
 			c = 0;
 			continue;
@@ -202,11 +204,12 @@ bool convertStream(FILE *in, const char *output)
 		if (c != data[i] || number == 255) {
 			if (c) {
 				fwrite(&number, 1, 1, out);
-				if (c < '9')
-					c -= '0';
+				if (c == ' ')
+					c = 0;
+				else if (c < '9')
+					c -= '0' - 1;
 				else
-					c -= 'a' - 10;
-				c |= 0x80U;
+					c -= 'a' - 11;
 				fwrite(&c, 1, 1, out);
 			}
 			number = 0;
@@ -216,11 +219,12 @@ bool convertStream(FILE *in, const char *output)
 	}
 	if (c) {
 		fwrite(&number, 1, 1, out);
-		if (c < '9')
-			c -= '0';
+		if (c == ' ')
+			c = 0;
+		else if (c < '9')
+			c -= '0' - 1;
 		else
-			c -= 'a' - 10;
-		c |= 0x80U;
+			c -= 'a' - 11;
 		fwrite(&c, 1, 1, out);
 	}
 	number = 0;

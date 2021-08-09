@@ -32,7 +32,7 @@ updatePlayerSprite::
 	add $8
 	add d
 	ld [hli], a
-	ld a, 1
+	xor a
 	ld [hli], a
 	ld a, d
 	rla
@@ -48,7 +48,7 @@ updatePlayerSprite::
 	add $10
 	sub d
 	ld [hli], a
-	ld a, 2
+	ld a, 1
 	ld [hli], a
 	ld a, d
 	rla
@@ -67,26 +67,26 @@ updatePlayerSprite::
 
 	ld a, [playerState]
 	and STATE_OPENING
-	ld a, 3
+	ld a, 2
 	jr nz, .01draw
 
 	ld a, [playerState]
 	and STATE_EYE_CLOSED | STATE_JUMPING
 	ld e, a
-	ld a, 3
+	ld a, 2
 	jr z, .01draw
 
 	ld a, STATE_EYE_CLOSED | STATE_JUMPING
 	cp e
-	ld a, $16
+	ld a, $15
 	jr z, .01draw
 
 	ld a, STATE_EYE_CLOSED
 	and e
-	ld a, 13
+	ld a, 12
 	jr nz, .01draw
 
-	ld a, $10
+	ld a, $F
 .01draw::
 	ld [hli], a
 	ld a, d
@@ -106,26 +106,26 @@ updatePlayerSprite::
 
 	ld a, [playerState]
 	and STATE_OPENING
-	ld a, 15
+	ld a, 14
 	jr nz, .11draw
 
 	ld a, [playerState]
 	and STATE_EYE_CLOSED | STATE_JUMPING
 	ld e, a
-	ld a, 4
+	ld a, 3
 	jr z, .11draw
 
 	ld a, STATE_EYE_CLOSED | STATE_JUMPING
 	cp e
-	ld a, $17
+	ld a, $16
 	jr z, .11draw
 
 	ld a, STATE_EYE_CLOSED
 	and e
-	ld a, $E
+	ld a, $D
 	jr nz, .11draw
 
-	ld a, $11
+	ld a, $10
 .11draw::
 	ld [hli], a
 	ld a, d
@@ -149,9 +149,9 @@ updatePlayerSprite::
 	ld [hli], a
 	ld a, [playerState]
 	and STATE_JUMPING
-	ld a, 5
+	ld a, 4
 	jr z, .02draw
-	ld a, $12
+	ld a, $11
 .02draw:
 	ld [hli], a
 	ld a, d
@@ -169,9 +169,9 @@ updatePlayerSprite::
 	ld [hli], a
 	ld a, [playerState]
 	and STATE_JUMPING
-	ld a, 6
+	ld a, 5
 	jr z, .12draw
-	ld a, $13
+	ld a, $12
 .12draw:
 	ld [hli], a
 	ld a, d
@@ -188,7 +188,7 @@ updatePlayerSprite::
 	add d
 	push de
 	ld d, a
-	ld e, 7
+	ld e, 6
 
 	ld a, [playerState]
 	and STATE_OPENING
@@ -196,10 +196,10 @@ updatePlayerSprite::
 
 	ld a, [playerState]
 	and STATE_JUMPING
-	ld e, $14
+	ld e, $13
 	jr nz, .keepCopyLastX
 
-	ld e, 7
+	ld e, 6
 	ld a, [playerState]
 	and STATE_WALKING
 	jr z, .keepCopyLastX
@@ -212,10 +212,10 @@ updatePlayerSprite::
 	and 2
 	jr nz, .animFrame2X
 
-	ld e, 9
+	ld e, 8
 	jr .keepCopyLastX
 .animFrame2X::
-	ld e, 11
+	ld e, 10
 .keepCopyLastX::
 	ld a, d
 	ld [hli], a
@@ -237,16 +237,16 @@ updatePlayerSprite::
 	sub d
 	push de
 	ld d, a
-	ld e, 8
+	ld e, 7
 	ld a, [playerState]
 	and STATE_OPENING
 	jr nz, .keepCopyLastY
 
 	ld a, [playerState]
 	and STATE_JUMPING
-	ld e, $15
+	ld e, $14
 	jr nz, .keepCopyLastY
-	ld e, 8
+	ld e, 7
 
 	ld a, [playerState]
 	and STATE_WALKING
@@ -260,10 +260,10 @@ updatePlayerSprite::
 	and 2
 	jr nz, .animFrame2Y
 
-	ld e, 10
+	ld e, 9
 	jr .keepCopyLastY
 .animFrame2Y::
-	ld e, 12
+	ld e, 11
 .keepCopyLastY::
 	ld a, d
 	ld [hli], a
@@ -388,7 +388,7 @@ inGame::
 	reset lcdCtrl
 	ld hl, koishi
 	ld bc, $10 * $17
-	ld de, VRAMStart + $10
+	ld de, VRAMStart
 	call copyMemory
 
 	ld hl, cgbObjPalIndex
@@ -403,7 +403,7 @@ inGame::
 	dec b
 	jr nz, .bgPalLoop
 
-	reg lcdCtrl, %11011011
+	reg lcdCtrl, %11001011
 	ld hl, KoishiTheme
 	ld de, playingMusics
 	call startMusic
