@@ -434,6 +434,8 @@ inGame::
 	xor a
 	call loadMap
 
+	ld a, 1
+	ld [ROMBankSelect], a
 	reg lcdCtrl, %11000011
 	ld hl, KoishiTheme
 	ld de, playingMusics
