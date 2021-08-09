@@ -50,11 +50,29 @@ With an item, you could freeze time while eyes closed.
 - Regular terrain, tangible in both worlds
 - Regular objects (heavy doors, some actionable objects)
 
-- Real enemies, only tangible in the real world
+- Physical enemies, only tangible in the real world
 - Spiritual enemies, only tangible in the spiritual world
 
-- Real objects (keys)
+- Physical objects (keys)
 - Spiritual objects (?)
+
+
+REGULAR
+- Stone platforms: regular terrain
+- Stone bridge: can go through with "down"
+- Buckets: moves up and down with "up" and "down" buttons
+- Lava: kills
+
+PHYSICAL
+- Wooden platforms: terrain
+- Wooden bridge: can go through with "down"
+- Blowholes: blows wind 
+- Spikes: kills
+
+SPIRITUAL
+- Spiritual platforms: terrain
+- Spiritual blowholes: blows wind that pushes you away if you are eyes closed
+- Wisp: kills
 
 ### Controls
 up: Close eyes
