@@ -37,7 +37,6 @@ updatePlayerSprite::
 	ld a, d
 	rla
 	rla
-	or 2
 	ld [hli], a
 
 	; 10
@@ -53,7 +52,6 @@ updatePlayerSprite::
 	ld a, d
 	rla
 	rla
-	or 2
 	ld [hli], a
 
 	; 01
