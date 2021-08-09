@@ -313,3 +313,99 @@ getKeysFiltered::
 	ld [hl], a
 	ld a, c
 	ret
+
+; Divides a number by another
+; Params:
+;       c -> Dividend
+;	d -> Divider
+; Return:
+;	e -> Modulo
+;       b -> Quotient
+; Registers:
+;	af -> Not preserved
+;	d  -> Not preserved
+;	c  -> Not preserved
+;	hl -> Preserved
+divide::
+	ld b, 0
+	ld e, b
+	ld a, 8
+.loop::
+	push af
+	sla b
+	rl c
+	rl e
+	ld a, e
+	cp d
+	jr c, .noInc
+
+	inc b
+	sub d
+	ld e, a
+
+.noInc::
+	pop af
+	dec a
+	jr nz, .loop
+	ret
+
+
+; Multiplies 2 numbers
+; Params:
+;       c -> Number 1
+;	b -> Number 2
+; Return:
+;	de -> result
+; Registers:
+;	af -> Not preserved
+;	bc -> Not preserved
+;	hl -> Preserved
+multiply::
+	xor a
+	or b
+	jr z, .zero
+
+.multiplyRecurse::
+	xor a
+	or c
+	jr z, .zero
+
+	xor a
+	bit 0, c
+	jr z, .unset
+	ld a, b
+.unset::
+	srl c
+	push af
+	call .multiplyRecurse
+	xor a
+	rl e
+	rl d
+	pop af
+	add e
+	ld e, a
+	ld a, d
+	adc 0
+	ld d, a
+	ret
+
+.zero::
+	ld d, a
+	ld e, a
+	ret
+
+loadFont::
+	reg ROMBankSelect, 3
+	ld de, VRAMStart + "A" * $10 + $1000
+	ld hl, font
+	ld a, 3
+	ld bc, 8 * 26
+	call uncompress
+
+	ld de, VRAMStart + "." * $10 + $1000
+	ld bc, 8 * 12
+	call uncompress
+
+	ld de, VRAMStart + "a" * $10 + $1000
+	ld bc, 8 * 30
+	jp uncompress

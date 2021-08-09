@@ -88,15 +88,16 @@ bool processLine(char *line, struct MapFile *file)
 {
 	for (int i = 0; line[i] && line[i + 1]; i += 2) {
 		line[i / 2] = line[i];
-		if (line[i] != line[i + 1]) {
-			fprintf(stderr, "Line #%i: Character %i '%c' (%i) does not match character %i '%c' (%i).\n", file->height + 1, i + 1, line[i], line[i], i + 2, line[i + 1], line[i + 1]);
+		if ((line[i + 1] < '0' || line[i + 1] >= '4') && ((line[i] >= '0' && line[i] <= '9') || (line[i] >= 'a' && line[i] <= 'z'))) {
+			fprintf(stderr, "Line #%i: Character %i '%c' (%i) is not a valid property value.\n", file->height + 1, i + 2, line[i + 1], line[i + 1]);
 			return false;
 		}
 		switch (line[i]) {
 		case '|':
 			if (!addBucket(file, i))
 				return false;
-			line[i / 2] = '1';
+			line[i / 2] = 2;
+			line[i / 2] |= 1 << 7;
 			continue;
 		case 'P':
 			file->playerX = (i * 4) * 8;
@@ -105,10 +106,57 @@ bool processLine(char *line, struct MapFile *file)
 		case 'B':
 			fillBucket(file, i);
 			break;
-		default:
+		case '_':
+		case '-':
+		case ' ':
+			break;
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			line[i / 2] = line[i] - '0' + 1;
+			line[i / 2] |= (line[i + 1] - '0') << 6;
 			continue;
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		case 'g':
+		case 'h':
+		case 'i':
+		case 'j':
+		case 'k':
+		case 'l':
+		case 'm':
+		case 'n':
+		case 'o':
+		case 'p':
+		case 'q':
+		case 'r':
+		case 's':
+		case 't':
+		case 'u':
+		case 'v':
+		case 'w':
+		case 'x':
+		case 'y':
+		case 'z':
+			line[i / 2] = line[i] - 'a' + 11;
+			line[i / 2] |= (line[i + 1] - '0') << 6;
+			continue;
+		default:
+			fprintf(stderr, "Line #%i: Character %i '%c' (%i) is not a valid object character.\n", file->height + 1, i + 1, line[i], line[i]);
+			return false;
 		}
-		line[i / 2] = ' ';
+		line[i / 2] = 0;
 	}
 	return true;
 }
@@ -175,58 +223,19 @@ bool convertStream(FILE *in, const char *output)
 		);
 
 	unsigned char number = 0;
-	char c = 0;
+	char c =  data[0];
 
-	for (int i = 0; data[i]; i++) {
-		if (!strchr("0123456789abcdefghijklmnopqrstuvwxyz ", data[i])) {
-			if (c) {
-				fwrite(&number, 1, 1, out);
-				if (c == ' ')
-					c = 0;
-				else if (c < '9')
-					c -= '0' - 1;
-				else
-					c -= 'a' - 11;
-				fwrite(&c, 1, 1, out);
-			}
-			number = 0;
-			c = data[i];
-			if (c == ' ')
-				c = 0;
-			else if (c < '9')
-				c -= '0' - 1;
-			else
-				c -= 'a' - 11;
-			fwrite(&c, 1, 1, out);
-			c = 0;
-			continue;
-		}
+	for (int i = 0; i < file.width * file.height; i++) {
 		if (c != data[i] || number == 255) {
-			if (c) {
-				fwrite(&number, 1, 1, out);
-				if (c == ' ')
-					c = 0;
-				else if (c < '9')
-					c -= '0' - 1;
-				else
-					c -= 'a' - 11;
-				fwrite(&c, 1, 1, out);
-			}
+			fwrite(&number, 1, 1, out);
+			fwrite(&c, 1, 1, out);
 			number = 0;
 			c = data[i];
 		}
 		number++;
 	}
-	if (c) {
-		fwrite(&number, 1, 1, out);
-		if (c == ' ')
-			c = 0;
-		else if (c < '9')
-			c -= '0' - 1;
-		else
-			c -= 'a' - 11;
-		fwrite(&c, 1, 1, out);
-	}
+	fwrite(&number, 1, 1, out);
+	fwrite(&c, 1, 1, out);
 	number = 0;
 	fwrite(&number, 1, 1, out);
 	free(data);

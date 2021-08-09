@@ -1,10 +1,13 @@
-SECTION "Assets", ROMX[$4000], BANK[1]
+SECTION "NOCGB", ROMX[$4000], BANK[3]
 
 noCGBScreen::
 	incbin "assets/nocgberror.fx"
 noCGBScreenMap::
 	incbin "assets/nocgberror.tilemap"
+font::
+	incbin "assets/font.zfx"
 
+SECTION "Assets", ROMX[$4000], BANK[1]
 koishi::
 	incbin "assets/koishi/00.cfx"           ; 00
 	incbin "assets/koishi/10.cfx"           ; 01
@@ -32,5 +35,13 @@ koishi_jump::
         incbin "assets/koishi/jump13.cfx"       ; 14
 	incbin "assets/koishi/jump01closed.cfx" ; 15
         incbin "assets/koishi/jump11closed.cfx" ; 16
+wisp::
+	incbin "assets/spritesheets/wisp.cfx"
+
+
+terrain::
+	incbin "assets/spritesheets/hellGround.cfx"
+	incbin "assets/spritesheets/stalagtites.cfx"
+terrainEnd::
 
 include "src/palettes.asm"

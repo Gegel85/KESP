@@ -21,6 +21,7 @@ SECTION "joypad", ROM0
 crash::
 	di
 	ld b, b
+	ld sp, $FFA0
 	ld hl, lcdLine
 .loop:
 	ld a, $90
@@ -34,6 +35,10 @@ crash::
 	dec l
 	ld [hl], a
 
+	call loadFont
+
+	xor a
+	ld [ROMBankSelect], a
 	ld hl, crashText
 	ld c, 16
 	xor a
@@ -55,7 +60,7 @@ crash::
 	ld [hli], a
 	dec c
 	jr nz, .copyLoop2
-	ld a, %10010001
+	ld a, %10000001
 	ld [lcdCtrl], a
 	jp lockup
 

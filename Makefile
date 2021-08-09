@@ -59,6 +59,7 @@ COLORED_IMGS = \
 	assets/koishi/jump12.png \
 	assets/koishi/jump03.png \
 	assets/koishi/jump13.png \
+	assets/spritesheets/stalagtites.png \
 	assets/spritesheets/hellGround.png \
 	assets/spritesheets/wisp.png \
 	assets/spritesheets/eye.png \

@@ -1,5 +1,6 @@
 SECTION "RAM", WRAM0
 
+include "src/constants.asm"
 include "src/sound/constants.asm"
 
 randomRegister::
@@ -48,15 +49,39 @@ playerAnim::
 playerAnimCtr::
 	ds $1
 
+cameraX::
+	ds $2
+cameraY::
+	ds $2
 
+cameraScreenTopLeftPtr::
+	ds $2
+cameraMapTopLeftPtrBank::
+	ds $1
+cameraMapTopLeftPtr::
+	ds $2
+cameraScreenTopRightPtr::
+	ds $2
+cameraMapTopRightPtrBank::
+	ds $1
+cameraMapTopRightPtr::
+	ds $2
+cameraScreenBottomLeftPtr::
+	ds $2
+cameraMapBottomLeftPtrBank::
+	ds $1
+cameraMapBottomLeftPtr::
+	ds $2
+
+
+mapNbObjects::
+	ds $1
 mapWidth::
 	ds $1
 mapHeight::
 	ds $1
-mapNbObjects::
-	ds $1
 mapObjects::
-	ds $20 * $5
+	ds $20 * OBJECT_STRUCT_SIZE
 
 SECTION "AUDIO_REGISTERS_MIRROR", WRAM0[$C410]
 Channel1Mirror::
@@ -92,4 +117,12 @@ loadedMapPart3::
 
 SECTION "LoadedMapPart4", WRAMX[$D000], BANK[4]
 loadedMapPart4::
+	ds $1000
+
+SECTION "LoadedMapPart5", WRAMX[$D000], BANK[5]
+loadedMapPart5::
+	ds $1000
+
+SECTION "LoadedMapPart6", WRAMX[$D000], BANK[6]
+loadedMapPart6::
 	ds $1000

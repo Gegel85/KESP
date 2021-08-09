@@ -13,9 +13,9 @@ SECTION "Main", ROM0
 notCGB::
 	call waitVBLANK
 	reset lcdCtrl
-	reg dmgBgPalData, $E4
+	reg dmgBgPalData, %00011011
 
-	reg ROMBankSelect, 2
+	reg ROMBankSelect, 3
 	ld hl, noCGBScreen
 	ld de, VRAMStart
 	ld bc, noCGBScreenMap - noCGBScreen
@@ -71,5 +71,6 @@ include "src/interrupts.asm"
 include "src/sound/music.asm"
 include "src/sound/sfx.asm"
 include "src/utils.asm"
+include "src/map.asm"
 
 include "src/sound/hartmanns_youkai_girl/main.asm"

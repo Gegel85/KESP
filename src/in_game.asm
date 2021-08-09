@@ -299,8 +299,18 @@ updatePlayer::
 	ld a, [hl]
 	ld b, a
 	adc 0
+	bit 7, a
+	jr nz, .speedChange
+	cp $06
+	jr nc, .noSpeedChange
+.speedChange::
 	ld [hld], a
+	jr .applySpeed
 
+.noSpeedChange::
+	dec hl
+
+.applySpeed::
 	ld a, [hld]
 	ld e, a
 	ld a, [hl]
@@ -389,11 +399,31 @@ inGame::
 	ld de, VRAMStart
 	call copyMemory
 
+	ld de, VRAMStart + $1000
+	ld a, $FF
+	ld bc, $10
+	call fillMemory
+	ld hl, terrain
+	ld bc, terrainEnd - terrain
+	call copyMemory
+
 	ld hl, cgbObjPalIndex
 	ld a, $80
 	ld [hli], a
 	ld de, koishiPal
-	ld b, $18
+	ld b, $40
+.objPalLoop::
+	ld a, [de]
+	inc de
+	ld [hl], a
+	dec b
+	jr nz, .objPalLoop
+
+	ld hl, cgbBgPalIndex
+	ld a, $80
+	ld [hli], a
+	ld de, terrainPal
+	ld b, $40
 .bgPalLoop::
 	ld a, [de]
 	inc de
@@ -401,7 +431,10 @@ inGame::
 	dec b
 	jr nz, .bgPalLoop
 
-	reg lcdCtrl, %11001011
+	xor a
+	call loadMap
+
+	reg lcdCtrl, %11000011
 	ld hl, KoishiTheme
 	ld de, playingMusics
 	call startMusic
