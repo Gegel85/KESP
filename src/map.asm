@@ -111,4 +111,104 @@ drawMap::
 	or c
 	jr nz, .loopAttr
 	reset VRAMBankSelect
+
+	ld hl, playerPosX + 1
+	ld a, [hld]
+	ld a, [hli]
+	xor a
+	ld [hli], a
+	ld b, a
+	ld hl, playerPosY + 1
+	ld a, [hld]
+	ld a, [hli]
+	xor a
+	ld [hli], a
+	ld c, a
+	jr calcCamera.calcCamera
+
+calcCamera::
+	ld a, [playerPosX]
+	ld b, a
+	ld a, [playerPosY]
+	ld c, a
+
+.calcCamera:
+	ld a, $48
+	cp b
+	jr z, .calcY
+
+	ld [playerPosX], a
+	sub b
+	cpl
+	inc a
+
+	ld d, a
+	ld hl, bgScrollX
+	ld e, [hl]
+	add e
+	bit 7, d
+	jr z, .checkPositiveX
+
+	cp e
+	jr c, .setScrollX
+	sub e
+	ld hl, playerPosX
+	add [hl]
+	ld [hl], a
+
+	xor a
+	jr .setScrollX
+.checkPositiveX:
+	cp $60
+	jr c, .setScrollX
+	sub $60
+	ld hl, playerPosX
+	add [hl]
+	ld [hl], a
+	ld a, $60
+	jr .setScrollX
+
+.setScrollX:
+	ld hl, bgScrollX
+	ld [hl], a
+
+.calcY:
+	ld a, $40
+	cp c
+	ret z
+	ld hl, playerPosY
+	ld [hli], a
+	sub c
+	cpl
+	inc a
+
+	ld d, a
+	ld hl, bgScrollY
+	ld e, [hl]
+	add e
+	bit 7, d
+	jr z, .checkPositiveY
+
+	cp e
+	jr c, .setScrollY
+	sub e
+	ld hl, playerPosY
+	add [hl]
+	ld [hl], a
+
+	xor a
+	jr .setScrollY
+.checkPositiveY:
+	cp $70
+	jr c, .setScrollY
+	sub $70
+	ld hl, playerPosY
+	add [hl]
+	ld [hl], a
+	ld a, $70
+	jr .setScrollY
+
+.setScrollY:
+	ld hl, bgScrollY
+	ld [hl], a
 	ret

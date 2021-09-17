@@ -100,7 +100,7 @@ bool processLine(char *line, struct MapFile *file)
 			line[i / 2] |= 1 << 7;
 			continue;
 		case 'P':
-			file->playerX = (i * 4) * 8;
+			file->playerX = (i / 2) * 8;
 			file->playerY = file->height * 8;
 			break;
 		case 'B':

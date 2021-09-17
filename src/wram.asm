@@ -48,6 +48,8 @@ playerAnim::
 	ds $1
 playerAnimCtr::
 	ds $1
+playerMapPtr::
+	ds $2
 
 cameraX::
 	ds $2
@@ -72,7 +74,6 @@ cameraMapBottomLeftPtrBank::
 	ds $1
 cameraMapBottomLeftPtr::
 	ds $2
-
 
 mapNbObjects::
 	ds $1

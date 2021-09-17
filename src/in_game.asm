@@ -381,7 +381,7 @@ updatePlayer::
 	ld [playerState], a
 
 .end:
-	ret
+	jp calcCamera
 
 
 preparePlayer::
