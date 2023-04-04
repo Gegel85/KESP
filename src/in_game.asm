@@ -289,7 +289,7 @@ updatePlayer::
 	ld hl, playerState
 	ld a, [hli]
 	and STATE_OPENING
-	jr nz, .checkClosingOpening
+	jp nz, .checkClosingOpening
 	ld hl, playerSpeedY + 1
 
 	ld a, [hl]
@@ -303,20 +303,21 @@ updatePlayer::
 	jr nz, .speedChange
 	cp $06
 	jr nc, .noSpeedChange
-.speedChange::
+.speedChange:
 	ld [hld], a
-	jr .applySpeed
+	jr .applySpeedY
 
-.noSpeedChange::
+.noSpeedChange:
 	dec hl
 
-.applySpeed::
+.applySpeedY:
 	ld a, [hld]
 	ld e, a
 	ld a, [hl]
 	push hl
 	ld l, e
 	ld h, a
+	ld e, a
 	add hl, bc
 	ld b, h
 	ld c, l
@@ -325,6 +326,75 @@ updatePlayer::
 	ld [hli], a
 	ld [hl], c
 
+	ld a, b
+	and %11111000
+	ld b, a
+	ld a, e
+	and %11111000
+	cp b
+	jr z, .applySpeedX
+
+	; TODO: Support other map size, different from 32x32
+	ld c, a
+	ld a, b
+	sub c
+	ld c, a
+	jr nc, .noCarryY
+	ld b, $FF
+	jr .updatePlayerPtrY
+.noCarryY:
+	ld b, 0
+.updatePlayerPtrY:
+	sla c
+	rl b
+	sla c
+	rl b
+	ld hl, playerMapPtr
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+	add hl, bc
+	ld a, [playerSpeedY]
+	bit 7, a
+	jr nz, .speedYNeg
+	ld bc, 32 * 3
+	add hl, bc
+	ld bc, -32
+	ld d, -8
+	jr .updatePlayerPtrYLoop
+.speedYNeg:
+	ld bc, 32
+	ld d, 8
+
+.updatePlayerPtrYLoop:
+	ld a, [hl]
+	cp $11
+	jr nc, .savePtrY
+	add hl, bc
+	ld a, h
+	and $DF
+	set 4, a
+	ld h, a
+	ld a, [playerPosY]
+	add d
+	ld [playerPosY], a
+	jr .updatePlayerPtrYLoop
+
+.savePtrY:
+	ld a, [playerSpeedY]
+	bit 7, a
+	jr nz, .ptrYSave
+	ld bc, -32 * 3
+	add hl, bc
+
+.ptrYSave:
+	ld a, l
+	ld b, h
+	ld hl, playerMapPtr
+	ld [hli], a
+	ld [hl], b
+
+.applySpeedX:
 	ld hl, playerSpeedX + 1
 	ld a, [hld]
 	ld c, a
@@ -336,6 +406,7 @@ updatePlayer::
 	push hl
 	ld l, e
 	ld h, a
+	ld e, a
 	add hl, bc
 	ld b, h
 	ld c, l
@@ -343,7 +414,84 @@ updatePlayer::
 	ld a, b
 	ld [hli], a
 	ld [hl], c
-	jr .checkCollisions
+
+	ld a, b
+	and %11111000
+	ld b, a
+	ld a, e
+	and %11111000
+	cp b
+	jr z, .checkCollisions
+
+	; TODO: Support other map size, different from 32x32
+	ld c, a
+	ld a, b
+	sub c
+	ld c, a
+	jr nc, .noCarryX
+	ld b, $FF
+	jr .updatePlayerPtrX
+.noCarryX:
+	ld b, 0
+.updatePlayerPtrX:
+	ld b, b
+	rrc b
+	rr c
+	rrc b
+	rr c
+	rrc b
+	rr c
+	ld hl, playerMapPtr
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+	add hl, bc
+	ld a, [playerSpeedX]
+	bit 7, a
+	jr nz, .speedXNeg
+
+	ld bc, 1
+	add hl, bc
+
+	ld bc, -1
+	ld d, -8
+	jr .updatePlayerPtrXLoop
+.speedXNeg:
+	ld bc, 1
+	ld d, 8
+
+.updatePlayerPtrXLoop:
+	ld a, [hl]
+	cp $11
+	jr nc, .savePtrX
+
+	ld a, l
+	and %11100000
+	add hl, bc
+	ld e, a
+	ld a, %00011111
+	and l
+	or e
+	ld a, l
+
+	ld a, [playerPosX]
+	add d
+	ld [playerPosX], a
+	jr .updatePlayerPtrXLoop
+
+.savePtrX:
+	ld a, [playerSpeedX]
+	bit 7, a
+	jr nz, .ptrXSave
+	ld bc, -1
+	add hl, bc
+
+.ptrXSave:
+	ld a, l
+	ld b, h
+	ld hl, playerMapPtr
+	ld [hli], a
+	ld [hl], b
 
 .checkClosingOpening::
 	ld a, [hld]
@@ -357,13 +505,10 @@ updatePlayer::
 	ld [hli], a
 
 .checkCollisions::
-	ld a, [playerState]
-	or STATE_JUMPING
-	ld [playerState], a
 	ld hl, playerPosY
 	ld a, [hl]
 	cp 144 - 32
-	jr c, .end
+	jr c, .checkGround
 
 	ld a, 144 - 32
 	ld [hli], a
@@ -379,6 +524,44 @@ updatePlayer::
 	ld a, [playerState]
 	and ~STATE_JUMPING
 	ld [playerState], a
+
+.checkGround:
+	ld hl, playerMapPtr
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a
+
+	; TODO: Support other map size, different from 32x32
+	ld bc, 4 * 32
+	add hl, bc
+	ld a, h
+	and $DF
+	set 4, a
+	ld h, a
+	ld a, [hli]
+	cp $11
+	jr c, .onGround
+	ld a, [hl]
+	cp $11
+	jr c, .onGround
+
+	ld a, [playerState]
+	or STATE_JUMPING
+	ld [playerState], a
+	xor a
+	ld [playerPosY + 1], a
+	jr .end
+.onGround:
+	ld a, [playerState]
+	and ~STATE_JUMPING
+	ld [playerState], a
+	xor a
+	ld hl, playerSpeedY
+	ld [hli], a
+	ld [hl], a
+	ld hl, playerSpeedX
+	ld [hli], a
+	ld [hl], a
 
 .end:
 	jp calcCamera

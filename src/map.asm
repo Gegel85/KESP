@@ -59,7 +59,7 @@ uncompressMap::
 .loop::
 	ld a, [de]
 	or a
-	jr z, drawMap
+	jr z, calcPlayerPtr
 	inc de
 	ld c, a
 	ld a, [de]
@@ -76,6 +76,38 @@ uncompressMap::
 	jr .loop
 .changeBank::
 	jp crash
+
+calcPlayerPtr::
+	ld hl, loadedMapPart1
+	ld b, 0
+	ld a, [playerPosY]
+	ld c, a
+	sla c
+	rl b
+	sla c
+	rl b
+	sla c
+	rl b
+	sla c
+	rl b
+	sla c
+	rl b
+
+	ld a, [playerPosX]
+	srl a
+	srl a
+	srl a
+	add c
+	ld c, a
+
+	add hl, bc
+	ld a, l
+	ld b, h
+	ld hl, playerMapPtr
+	ld [hli], a
+	ld [hl], b
+
+	; TODO: Support other map size, different from 32x32
 
 drawMap::
 	ld b, 1
