@@ -10,17 +10,17 @@
 ;    bc -> Preserved
 ;    de -> Preserved
 ;    hl -> Preserved
-reg: MACRO
+MACRO reg
 	ld a, \2
 	ld [\1], a
 ENDM
 
-toggleCpuSpeed: MACRO
+MACRO toggleCpuSpeed
 	reg speedSwitch, 1
 	stop
 ENDM
 
-setCpuDoubleSpeed: MACRO
+MACRO setCpuDoubleSpeed
 	ld hl, speedSwitch
 	bit 7, [hl]
 	jr nz, .skip\@
@@ -29,7 +29,7 @@ setCpuDoubleSpeed: MACRO
 .skip\@:
 ENDM
 
-setCpuSimpleSpeed: MACRO
+MACRO setCpuSimpleSpeed
 	ld hl, speedSwitch
 	bit 7, [hl]
 	jr z, .skip\@
@@ -38,7 +38,7 @@ setCpuSimpleSpeed: MACRO
 .skip\@:
 ENDM
 
-startGPDMA: MACRO
+MACRO startGPDMA
 	ld hl, newDmaSrcH
 	ld [hl], (\1) >> 8
 	inc l
@@ -51,7 +51,7 @@ startGPDMA: MACRO
 	ld [hl], (\3) / $10 - 1
 ENDM
 
-startHDMA: MACRO
+MACRO startHDMA
 	ld hl, newDmaSrcH
 	ld [hl], (\1) >> 8
 	inc l
@@ -64,7 +64,7 @@ startHDMA: MACRO
 	ld [hl], (1 << 7) | ((\3) / $10 - 1)
 ENDM
 
-reset: MACRO
+MACRO reset
 	xor a
 	ld [\1], a
 ENDM

@@ -75,42 +75,42 @@ PLAY	      RB 1
 REPEAT        RB 1
 CONTINUE      RB 1
 
-continue: MACRO
+MACRO continue
 	db CONTINUE
 ENDM
 
-repeat: MACRO
+MACRO repeat
 	db REPEAT
 	db \1 - 1
 ENDM
 
-play: MACRO
+MACRO play
 	db PLAY
 	db ((2048 - 131072 / (\1)) >> 8) | (\2)
 ENDM
 
-playRaw: MACRO
+MACRO playRaw
 	db PLAY
 	db \1
 ENDM
 
-setFrequency: MACRO ; setFrequency(byte frequency)
+MACRO setFrequency ; setFrequency(byte frequency)
 	ASSERT (2048 - 131072 / (\1)) > 0
 	db SET_FREQU
 	dw (2048 - 131072 / (\1)) | ((\2)) << 8
 ENDM
 
-setFrequencyRaw: MACRO ; setFrequency(byte frequency)
+MACRO setFrequencyRaw ; setFrequency(byte frequency)
 	db SET_FREQU
 	dw (\1) | ((\2)) << 8
 ENDM
 
-setVolume: MACRO ; setVolume(byte volume)
+MACRO setVolume ; setVolume(byte volume)
 	db SET_VOL
 	db \1
 ENDM
 
-setRegisters: MACRO ; setRegisters(byte values[nbRegisters])
+MACRO setRegisters ; setRegisters(byte values[nbRegisters])
 	db SET_REGISTERS
 	IF _NARG == 4
         	db \1, \2, \3, \4
@@ -124,31 +124,31 @@ setRegisters: MACRO ; setRegisters(byte values[nbRegisters])
         ENDC
 ENDM
 
-disableTerminals: MACRO ; disableTerminals(byte terminalsMask)
+MACRO disableTerminals ; disableTerminals(byte terminalsMask)
 	db DIS_TERM
 	db ~(\1)
 ENDM
 
-enableTerminals: MACRO ; enableTerminals(byte terminalsMask)
+MACRO enableTerminals ; enableTerminals(byte terminalsMask)
 	db ENA_TERM
 	db \1
 ENDM
 
-wait: MACRO ; wait(unsigned short units)
+MACRO wait ; wait(unsigned short units)
 	db WAIT
 	dw ((\1) + $100)
 ENDM
 
-jump: MACRO ; jump(unsigned addr)
+MACRO jump ; jump(unsigned addr)
 	db JUMP
 	dw \1
 ENDM
 
-stopMusic: MACRO ; stopMusic()
+MACRO stopMusic ; stopMusic()
 	db STOP_MUS
 ENDM
 
-writeRegisterI: MACRO
+MACRO writeRegisterI
 	push hl
 	ld h, Channel1Mirror >> 8
 	ld [hl], \1
@@ -156,7 +156,7 @@ writeRegisterI: MACRO
 	ldi [hl], \1
 ENDM
 
-writeRegister: MACRO
+MACRO writeRegister
 	push hl
 	ld h, Channel1Mirror >> 8
 	ld [hl], \1

@@ -5,3 +5,4 @@ koishiPal::
 
 terrainPal::
 	incbin "assets/spritesheets/hellGround.pal"
+	incbin "assets/spritesheets/stalagtites.pal"

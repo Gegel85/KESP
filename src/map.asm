@@ -2,6 +2,11 @@ mapArray::
 	db BANK(mapA1_1)
 	dw mapA1_1
 
+tilePaletteArray::
+	db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	db 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+	db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
 loadMap::
 	rla
 	ld b, 0
@@ -118,7 +123,7 @@ drawMap::
 	ld bc, $400
 .loopTiles::
 	ld a, [hli]
-	and %111111
+	and %00111111
 	ld [de], a
 	inc de
 	dec bc
@@ -132,11 +137,26 @@ drawMap::
 	ld de, VRAMBgStart
 	ld bc, $400
 .loopAttr::
+	push bc
+	ld a, [hl]
+	and %00111111
+	push hl
+	ld hl, tilePaletteArray
+	add l
+	ld l, a
+	ld a, h
+	adc 0
+	ld h, a
+	ld b, [hl]
+	pop hl
 	ld a, [hli]
 	and %11000000
 	srl a
+	or b
 	ld [de], a
 	inc de
+
+	pop bc
 	dec bc
 	xor a
 	or b

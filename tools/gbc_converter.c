@@ -205,7 +205,7 @@ unsigned make_tile_palette(ProcessedImage *result, Pixel *tile[8], unsigned _x, 
 			if (temp[j].is_used)
 				fprintf(stdout, "%02x, %02x, %02x (%04x)\n", temp[j].r, temp[j].g, temp[j].b, temp[j].val);
 		fprintf(stdout, "There are %i palettes in use:\n", result->pal_nbr);
-		for (int i = 0; i < result->pal_nbr; i++) {
+		for (unsigned i = 0; i < result->pal_nbr; i++) {
 			fprintf(stdout, "Palette %i.\n", i);
 			for (int j = 0; j < 4; j++)
 				if (result->palettes[i][j].is_used)

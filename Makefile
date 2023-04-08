@@ -8,11 +8,11 @@ LD = rgblink
 
 FIX = rgbfix
 
-FIXFLAGS = -cjsv -k 00 -l 0x33 -m 0x02 -p 0 -r 01 -t "`echo "$(NAME)" | tr a-z A-Z | tr "_" " "`"
+FIXFLAGS = -cjsv -k 00 -l 0x33 -m 0x02 -p 0xFF -r 02 -t "`echo "$(NAME)" | tr a-z A-Z | tr "_" " "`"
 
-ASMFLAGS =
+ASMFLAGS = -Hl
 
-LDFLAGS = -n $(NAME).sym -l $(NAME).link
+LDFLAGS = -n $(NAME).sym -l $(NAME).link -p 0xFF
 
 FXFLAGS = -u
 
@@ -59,8 +59,8 @@ COLORED_IMGS = \
 	assets/koishi/jump12.png \
 	assets/koishi/jump03.png \
 	assets/koishi/jump13.png \
-	assets/spritesheets/stalagtites.png \
 	assets/spritesheets/hellGround.png \
+	assets/spritesheets/stalagtites.png \
 	assets/spritesheets/wisp.png \
 	assets/spritesheets/eye.png \
 
@@ -122,7 +122,11 @@ runw:	re
 	$(FX) $(FXFLAGS) -T -o $@ $<
 
 %.cfx : %.png
-	$(FX) $(FXFLAGS) -T -P -o $@ $<
+	if [ -f $*.flags ]; then \
+		$(FX) $(FXFLAGS) -T -o $@ @$*.flags $<; \
+	else \
+		$(FX) $(FXFLAGS) -T -P -o $@ $<; \
+	fi
 
 %.ofx : %.png
 	$(FX) $(FXFLAGS) -T -P -o $(@:%.ofx=%.ofo) $<
