@@ -178,6 +178,7 @@ updateMusics::
 	add hl, de
 	dec b
 	jr nz, .reactivateLoop
+	; Finally, we increment the number of time we repeated
 	ld hl, nbRepeated
 	inc [hl]
 	pop hl
@@ -227,12 +228,14 @@ updateMusic::
 	ld d, a
 	push hl
 
+	; Execute the music instructions until it should stop
 .loop:
 	pop hl
 	push hl
 	call executeMusicCommand
 	jr z, .loop
 
+	; Update the CURRENT_ELEM_PTR
 	pop hl
 	dec hl
 	dec hl
@@ -241,6 +244,7 @@ updateMusic::
 	ld [hl], d
 
 .end:
+	; Finally, lower the WAITING_TIME by one
 	pop hl
 	inc hl
 	dec [hl]

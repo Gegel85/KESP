@@ -164,7 +164,6 @@ drawMap::
 	jr nz, .loopAttr
 	reset VRAMBankSelect
 
-	ld b, b
 	ld hl, playerPosX + 1
 	ld a, [hld]
 	ld [hli], a
@@ -186,7 +185,6 @@ calcCamera::
 	ld c, a
 
 .calcCamera:
-	ld b, b
 	ld a, $48
 	cp b
 	jr z, .calcY

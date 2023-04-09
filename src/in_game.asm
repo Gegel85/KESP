@@ -434,7 +434,6 @@ updatePlayer::
 .noCarryX:
 	ld b, 0
 .updatePlayerPtrX:
-	ld b, b
 	rrc b
 	rr c
 	rrc b
