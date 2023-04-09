@@ -164,18 +164,19 @@ drawMap::
 	jr nz, .loopAttr
 	reset VRAMBankSelect
 
+	ld b, b
 	ld hl, playerPosX + 1
 	ld a, [hld]
-	ld a, [hli]
-	xor a
 	ld [hli], a
 	ld b, a
-	ld hl, playerPosY + 1
-	ld a, [hld]
-	ld a, [hli]
 	xor a
 	ld [hli], a
+	ld hl, playerPosY + 1
+	ld a, [hld]
+	ld [hli], a
 	ld c, a
+	xor a
+	ld [hli], a
 	jr calcCamera.calcCamera
 
 calcCamera::
@@ -185,14 +186,14 @@ calcCamera::
 	ld c, a
 
 .calcCamera:
+	ld b, b
 	ld a, $48
 	cp b
 	jr z, .calcY
 
 	ld [playerPosX], a
 	sub b
-	cpl
-	inc a
+	neg
 
 	ld d, a
 	ld hl, bgScrollX

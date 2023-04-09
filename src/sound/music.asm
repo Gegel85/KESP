@@ -1,9 +1,13 @@
 include "src/sound/constants.asm"
 include "src/sound/commands.asm"
 
+; Description of each channel
 registersProperties::
+	; Number of registers
 	db $5
+	; First register
 	dw $FF10
+	; Frequency set register
 	dw $FF13
 
 	db $4
@@ -18,6 +22,17 @@ registersProperties::
 	dw $FF20
 	dw $FF22
 
+; Starts a music track
+; Params:
+;    hl -> Pointer to the music track header
+;    de -> Pointer to the playing music struct
+; Return:
+;    N/A
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preverved
 startMusic::
 	push hl
 	; Setup sound
@@ -41,10 +56,13 @@ startMusic::
 	ld [de], a
 	pop de
 
+	; In the loop below, we are missing registers!
+	; Instead, we store it on the stack.
 	ld bc, registersProperties
 	push bc
 
 	ld b, 4
+	; Initiliaze tracks for each channel
 .loop:
 	; CTRL_BYTE
 	ld a, %11
@@ -66,13 +84,14 @@ startMusic::
 	ld [de], a
 	inc de
 
-	; NB_REGISTERS
 	push hl
+	; We get the registersProperties var we stocked on the stack before the loop
 	ld hl, sp + 2
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
 
+	; Copy 5 bytes from the registersProperties array into the struct for NB_REGISTERS, REGISTERS_PTR and FREQUENCY_PTR...
 	ld c, 5
 .regFillLoop:
 	ld a, [hli]
@@ -81,6 +100,7 @@ startMusic::
 	dec c
 	jr nz, .regFillLoop
 
+	; ...and save the pointer to the next element in the array back on the stack
 	ld c, h
 	ld a, l
 	ld hl, sp + 2
@@ -103,7 +123,19 @@ startMusic::
 	ret
 
 
+; Updates a playing music struct
+; Params:
+;    hl -> Pointer to the playing music struct
+; Return:
+;    N/A
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preverved
 updateMusics::
+	; First, we check if the CURRENT_ELEM_PTR of the first track is NULL.
+	; If so, bail out.
 	push hl
 	inc hl
 	inc hl
@@ -113,11 +145,15 @@ updateMusics::
 	or [hl]
 	pop hl
 	ret z
+
+	; Update all the tracks once
 	push hl
 	call .update
 	pop hl
 	push hl
 
+	; We check if all channels are disabled
+	; If any channel is still playing, let's go to .done
 	ld de, MUSIC_STRUCT_SIZE
 	ld b, 4
 .checkLoop:
@@ -128,6 +164,7 @@ updateMusics::
 	jr nz, .checkLoop
 	pop hl
 
+	; If all channels are disabled, we enable them back
 	ld b, 4
 	ld de, MUSIC_STRUCT_SIZE - 2
 	push hl
@@ -150,15 +187,31 @@ updateMusics::
 	ret
 
 .update:
-	call updateMusic
-	call updateMusic
-	call updateMusic
+	; Here, we abuse the fact that updateMusic returns the next track pointer in hl
+	; and call it 4 times by setting the return address back to it
+	ld de, updateMusic
+	push de
+	push de
+	push de
+	; Fall through to the actual function
 
+
+; Updates a music track
+; Params:
+;    hl -> Pointer to the music struct
+; Return:
+;    hl -> Pointer to the next music struct in the array
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
 updateMusic::
+	; Check if the channel is disabled. If so, go to the end.
 	push hl
 	bit 0, [hl]
 	jr z, .end
 
+	; Check if the wait timer is 0. If not, go to the end.
 	xor a
 	inc hl
 	or [hl]
@@ -167,6 +220,7 @@ updateMusic::
 	inc hl
 	jr nz, .end
 
+	; Store CURRENT_ELEM_PTR in de
 	ld a, [hli]
 	ld e, a
 	ld a, [hli]

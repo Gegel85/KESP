@@ -58,11 +58,13 @@ lockup::
 
 ; Main function
 main::
+	; We init the stack here because init fills the whole RAM with 0
+	; If we add used
 	ld sp, $FFFF
 	cp CGB_A_INIT
 	jp nz, notCGB
 	call init
-
+; Fall through to main_menu.asm, the main_menu loading function
 
 include "src/main_menu.asm"
 include "src/in_game.asm"

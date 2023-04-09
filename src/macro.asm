@@ -20,6 +20,11 @@ MACRO toggleCpuSpeed
 	stop
 ENDM
 
+MACRO neg
+	cpl
+	inc a
+ENDM
+
 MACRO setCpuDoubleSpeed
 	ld hl, speedSwitch
 	bit 7, [hl]

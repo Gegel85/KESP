@@ -1,14 +1,23 @@
 ; Music struct
 RSRESET
+; Control byte
 CTRL_BYTE	  RB 1 ; Bit 0: Active (0: Off 1: On)
-		       ; Bit 1: Muted  (0: Off 1: On)
+                       ; Bit 1: Muted  (0: Off 1: On)
+; Number of ticks to wait before executing next instruction
 WAITING_TIME      RW 1
+; Pointer to the next instruction to execute
 CURRENT_ELEM_PTR  RW 1
+; Number of registers in this audio channel
 NB_REGISTERS      RB 1
+; Pointer to the first register of this audio channel
 REGISTERS_PTR     RW 1
+; Pointer to the frequency register of this audio channel
 FREQUENCY_PTR     RW 1
+; Number of loops remaining
 NB_REPEAT	  RB 1
+; Pointer to the instruction to loop to
 REPEAT_PTR        RW 1
+; Size of this struct (Not part of the struct itself)
 MUSIC_STRUCT_SIZE RB 1
 
 ; Music
@@ -48,20 +57,20 @@ NOTE_Bb      EQU 466
 NOTE_B       EQU 494
 NOTE_B_SHARP EQU 524
 
-; Music No Sound
+; Music no sound masks
 TERMINAL_ONE    EQU %00010001
 TERMINAL_TWO    EQU %00100010
 TERMINAL_THREE  EQU %01000100
 TERMINAL_FOUR   EQU %10001000
 
-; Music header
+; Music track header
 RSRESET
 TIMER_MODULO  RB 1
 TIMER_CONTROL RB 1
 NB_PROGRAMS   RB 1
-PROGRAMS_PTRS RB 1
+PROGRAMS_PTRS RW 4
 
-; Music commands
+; Music instructions opcodes
 RSRESET
 SET_FREQU     RB 1
 SET_VOL       RB 1
