@@ -11,7 +11,7 @@ MAX_DIFFICULTY = 3
 SECTION "Main", ROM0
 
 notCGB::
-	call waitVBLANK
+	call waitVBLANKInt
 	reset lcdCtrl
 	reg dmgBgPalData, %00011011
 
@@ -46,7 +46,7 @@ notCGB::
 ; Params:
 ;	None
 ; Return:
-;	None
+;	Never
 ; Registers:
 ;	N/A
 lockup::
@@ -66,8 +66,8 @@ main::
 	call init
 ; Fall through to main_menu.asm, the main_menu loading function
 
-include "src/main_menu.asm"
-include "src/in_game.asm"
+include "src/menus/main_menu.asm"
+include "src/menus/in_game.asm"
 include "src/init.asm"
 include "src/interrupts.asm"
 include "src/sound/music.asm"

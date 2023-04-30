@@ -27,10 +27,14 @@ WPRAM_init::
 init::
 	reg interruptEnable, VBLANK_INTERRUPT | TIMER_INTERRUPT | STAT_INTERRUPT
 
-	call waitVBLANK
+	call waitVBLANKInt
 	reset lcdCtrl
 
 	xor a
+	ld bc, $6000
+	ld de, VRAMStart
+	call fillMemory
+
 	ld b, $10
 	ld hl, $FF30
 .loop::
@@ -38,11 +42,6 @@ init::
 	ld [hli], a
 	dec b
 	jr nz, .loop
-
-	xor a
-	ld bc, $6000
-	ld de, VRAMStart
-	call fillMemory
 
 	ld bc, $10
 	ld hl, WPRAM_init

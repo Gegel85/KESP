@@ -31,7 +31,7 @@ loadMapPtr::
 	ld a, [hli]
 	ld [de], a
 
-	ld de, playerPosX
+	ld de, player + PLAYER_POSX
 	ld a, [hli]
 	ld [de], a
 	inc de
@@ -85,7 +85,7 @@ uncompressMap::
 calcPlayerPtr::
 	ld hl, loadedMapPart1
 	ld b, 0
-	ld a, [playerPosY]
+	ld a, [player + PLAYER_POSY]
 	ld c, a
 	sla c
 	rl b
@@ -98,7 +98,7 @@ calcPlayerPtr::
 	sla c
 	rl b
 
-	ld a, [playerPosX]
+	ld a, [player + PLAYER_POSX]
 	srl a
 	srl a
 	srl a
@@ -108,7 +108,7 @@ calcPlayerPtr::
 	add hl, bc
 	ld a, l
 	ld b, h
-	ld hl, playerMapPtr
+	ld hl, player + PLAYER_MAP_PTR
 	ld [hli], a
 	ld [hl], b
 
@@ -164,13 +164,13 @@ drawMap::
 	jr nz, .loopAttr
 	reset VRAMBankSelect
 
-	ld hl, playerPosX + 1
+	ld hl, player + PLAYER_POSX + 1
 	ld a, [hld]
 	ld [hli], a
 	ld b, a
 	xor a
 	ld [hli], a
-	ld hl, playerPosY + 1
+	ld hl, player + PLAYER_POSY + 1
 	ld a, [hld]
 	ld [hli], a
 	ld c, a
@@ -179,9 +179,9 @@ drawMap::
 	jr calcCamera.calcCamera
 
 calcCamera::
-	ld a, [playerPosX]
+	ld a, [player + PLAYER_POSX]
 	ld b, a
-	ld a, [playerPosY]
+	ld a, [player + PLAYER_POSY]
 	ld c, a
 
 .calcCamera:
@@ -189,7 +189,7 @@ calcCamera::
 	cp b
 	jr z, .calcY
 
-	ld [playerPosX], a
+	ld [player + PLAYER_POSX], a
 	sub b
 	neg
 
@@ -203,7 +203,7 @@ calcCamera::
 	cp e
 	jr c, .setScrollX
 	sub e
-	ld hl, playerPosX
+	ld hl, player + PLAYER_POSX
 	add [hl]
 	ld [hl], a
 
@@ -213,7 +213,7 @@ calcCamera::
 	cp $60
 	jr c, .setScrollX
 	sub $60
-	ld hl, playerPosX
+	ld hl, player + PLAYER_POSX
 	add [hl]
 	ld [hl], a
 	ld a, $60
@@ -227,7 +227,7 @@ calcCamera::
 	ld a, $40
 	cp c
 	ret z
-	ld hl, playerPosY
+	ld hl, player + PLAYER_POSY
 	ld [hli], a
 	sub c
 	cpl
@@ -243,7 +243,7 @@ calcCamera::
 	cp e
 	jr c, .setScrollY
 	sub e
-	ld hl, playerPosY
+	ld hl, player + PLAYER_POSY
 	add [hl]
 	ld [hl], a
 
@@ -253,7 +253,7 @@ calcCamera::
 	cp $70
 	jr c, .setScrollY
 	sub $70
-	ld hl, playerPosY
+	ld hl, player + PLAYER_POSY
 	add [hl]
 	ld [hl], a
 	ld a, $70

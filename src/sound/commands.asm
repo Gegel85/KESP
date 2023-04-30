@@ -276,6 +276,15 @@ executeMusicCommand::
 	; Read the current opcode to execute
 	ld a, [de]
 	inc de ; Increment de to this opcode's args
+	; We handle the EXEC opcode here directly
+	cp EXEC
+	jr nz, .selectHandler
+	ld h, d
+	ld l, e
+	inc de
+	inc de
+	jr .jmpTo
+.selectHandler:
 	sla a
 	; Load the corresponding code pointer
 	ld hl, cmdHandlers
@@ -284,6 +293,7 @@ executeMusicCommand::
 	ld a, 0
 	adc h
 	ld h, a
+.jmpTo:
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a

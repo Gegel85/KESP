@@ -1,5 +1,5 @@
 ROM0
-	org $003D
+	org $0000
 	"crash"
 	
 	org $0040

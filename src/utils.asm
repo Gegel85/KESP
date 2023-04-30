@@ -14,21 +14,28 @@
 uncompress::
 	push af
 	push de
-	push hl
-	pop de
+	ld d, h
+	ld e, l
 	pop hl
 	push hl
+	; Jump to the case based on a
 	ld hl, .case0
+	; Multiply a by 8 (because each case is 8 bytes long)
 	rla
 	rla
 	rla
+	; Add base offset of case0
 	add a, l
 	ld l, a
 	ld a, h
 	adc $00
 	ld h, a
 	jp hl
+
+	; Each case is 8 bytes long
 .case0:
+	; Mode 0: Duplicate the byte.
+	;         Pixel is either 3 or 0.
 	pop hl
 	ld a, [de]
 	ld [hli], a
@@ -37,6 +44,8 @@ uncompress::
 	nop
 	nop
 .case1:
+	; Mode 1: First byte is 0, second the byte inverted.
+	;         Pixel is either 2 or 0.
 	pop hl
 	xor a
 	ld [hli], a
@@ -45,6 +54,8 @@ uncompress::
 	ld [hli], a
 	jr .endCase
 .case2:
+	; Mode 2: Duplicate the byte inverted.
+	;         Pixel is either 3 or 0.
 	pop hl
 	ld a, [de]
 	cpl
@@ -53,6 +64,8 @@ uncompress::
 	nop
 	jr .endCase
 .case3:
+	; Mode 3: First byte is FF, second the byte the data.
+	;         Pixel is either 3 or 1.
 	pop hl
 	ld a, $FF
 	ld [hli], a
@@ -63,22 +76,17 @@ uncompress::
 
 	inc de
 	dec bc
-	xor a
-	or b
+	ld a, b
 	or c
+	push hl
+	ld h, d
+	ld l, e
+	pop de
 	jr nz, .continue
 	pop af
-	push hl
-	push de
-	pop hl
-	pop de
 	ret
 .continue:
 	pop af
-	push hl
-	push de
-	pop hl
-	pop de
 	jr uncompress
 
 ; Generates a pseudo random number.
@@ -115,8 +123,8 @@ random::
 ;    de -> Not preserved
 ;    hl -> Not preserved
 copyMemory::
-	xor a ; Check if size is 0
-	or b
+	; Check if size is 0
+	ld a, b
 	or c
 	ret z
 
@@ -126,6 +134,30 @@ copyMemory::
 	inc de
 	dec bc
 	jr copyMemory ; Recurse until bc is 0
+
+; Copies a chunk of memory and stream it into another
+; Params:
+;    bc -> The length of the chunk to copy
+;    de -> The destination address
+;    hl -> The source address
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
+streamMemory::
+	; Check if size is 0
+	ld a, b
+	or c
+	ret z
+
+	; Copy a byte of memory from hl to de
+	ld a, [hli]
+	ld [de], a
+	dec bc
+	jr streamMemory ; Recurse until bc is 0
 
 ; Fill a chunk of memory with a single value
 ; Params:
@@ -141,8 +173,8 @@ copyMemory::
 ;    hl -> Preserved
 fillMemory::
 	push af ; Save a
-	xor a   ; Check if bc is 0
-	or b
+	; Check if bc is 0
+	ld a, b
 	or c
 	jr z, .return
 	pop af
@@ -166,7 +198,7 @@ fillMemory::
 ;    bc -> Preserved
 ;    de -> Preserved
 ;    hl -> Preserved
-waitVBLANK::
+waitVBLANKInt::
 	ld a, [lcdCtrl] ; Check if LCD is disabled
 	bit 7, a
 	ret z
@@ -185,7 +217,26 @@ waitVBLANK::
 	ld [interruptEnable], a
 	ret
 
-; Wait for waitVBLANKDi. Only returns when a VBLANK occurs but don't execute the VBLANK interrupt handler.
+; Wait for VBLANK by checking the current line. Only returns when a VBLANK occurs.
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Preserved
+;    de -> Preserved
+;    hl -> Preserved
+waitVBLANKLine::
+	ld hl, lcdLine
+	ld a, $90 - 1
+.halt::
+	halt
+	cp [hl]
+	ret c
+	jr .halt
+
+; Wait for VBLANK. Only returns when a VBLANK occurs but don't execute the VBLANK interrupt handler.
 ; Params:
 ;    None
 ; Return:
@@ -260,29 +311,25 @@ waitFrames::
 ;    hl -> Not preserved
 getKeys::
 	ld hl, $FF00
-	ld a, %00010000
-	ld [hl], a
-	ld a, [hl]
-	ld a, [hl]
-	ld a, [hl]
-	ld a, [hl]
 	ld a, [hl]
 	and a, $F
 	ld b, a
 	swap b
 
-	ld a, %00100000
-	ld [hl], a
+	ld [hl], %00100000
 	ld a, [hl]
+	; Delay
 	ld a, [hl]
 	ld a, [hl]
 	ld a, [hl]
 	ld a, [hl]
 	and a, $F
 	or b
+	ld [hl], %00010000
 	ret
 
 ; Get all the pressed keys but disabled ones.
+; Disables all the currently pressed keys.
 ; Params:
 ;    None
 ; Return:
@@ -314,7 +361,7 @@ getKeysFiltered::
 	ld a, c
 	ret
 
-; Divides a number by another
+; Divides a number by another (c / d and c % d)
 ; Params:
 ;       c -> Dividend
 ;	d -> Divider
@@ -323,9 +370,25 @@ getKeysFiltered::
 ;       b -> Quotient
 ; Registers:
 ;	af -> Not preserved
-;	d  -> Not preserved
+;	d  -> Preserved
 ;	c  -> Not preserved
 ;	hl -> Preserved
+; The algorithm is as follows:
+;   unsigned short divide(unsigned char dividend, unsigned char divider) {
+;       unsigned char quotient = 0;
+;       unsigned char modulo = 0;
+;
+;       for (char counter = 8; counter > 0; counter--) {
+;            modulo = (modulo << 1) | (dividend >> 7);
+;            dividend = (dividend << 1) | (quotient >> 7);
+;            quotient = (quotient << 1) & 0xFF;
+;            if (modulo > divider) {
+;                 quotient++;
+;                 modulo -= divider;
+;            }
+;       }
+;       return {quotient, modulo};
+;   }
 divide::
 	ld b, 0
 	ld e, b
@@ -360,22 +423,36 @@ divide::
 ;	af -> Not preserved
 ;	bc -> Not preserved
 ;	hl -> Preserved
+; The algorithm is as follows:
+;   unsigned short .multiplyRecurse(unsigned char c, unsigned char b) {
+;       if (c == 0)
+;           return 0;
+;
+;       unsigned short result = .multiplyRecurse(c >> 1, b) << 1;
+;
+;       if (c & 1)
+;           return result + b;
+;       return result;
+;   }
+;
+;   unsigned short multiply(unsigned char c, unsigned char b) {
+;       if (b == 0)
+;           return 0;
+;       return .multiplyRecurse(c, b);
+;   }
 multiply::
 	xor a
 	or b
 	jr z, .zero
-
 .multiplyRecurse::
 	xor a
 	or c
 	jr z, .zero
 
 	xor a
-	bit 0, c
-	jr z, .unset
-	ld a, b
-.unset::
 	srl c
+	sbc a
+	and b
 	push af
 	call .multiplyRecurse
 	xor a
@@ -388,18 +465,28 @@ multiply::
 	adc 0
 	ld d, a
 	ret
-
 .zero::
 	ld d, a
 	ld e, a
 	ret
 
+; Uncompress the ROM font into VRAM using compression mode 3
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
+;    ROM bank -> Not preserved (BANK(font))
 loadFont::
-	reg ROMBankSelect, 3
+	reg ROMBankSelect, BANK(font)
 	ld de, VRAMStart + "A" * $10 + $1000
 	ld hl, font
-	ld a, 3
 	ld bc, 8 * 26
+	ld a, 3
 	call uncompress
 
 	ld de, VRAMStart + "." * $10 + $1000

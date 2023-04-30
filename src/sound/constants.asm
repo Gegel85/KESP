@@ -83,6 +83,7 @@ STOP_MUS      RB 1
 PLAY	      RB 1
 REPEAT        RB 1
 CONTINUE      RB 1
+EXEC          RB 1
 
 MACRO continue
 	db CONTINUE
@@ -171,4 +172,8 @@ MACRO writeRegister
 	ld [hl], \1
 	pop hl
 	ld [hl], \1
+ENDM
+
+MACRO exec ; exec(MusicCallback callback), see cmdHandlers for the callback definition
+	db EXEC, \1
 ENDM

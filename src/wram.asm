@@ -2,6 +2,7 @@ SECTION "RAM", WRAM0
 
 include "src/constants.asm"
 include "src/sound/constants.asm"
+include "src/player/struct.asm"
 
 randomRegister::
 	ds $1
@@ -34,22 +35,11 @@ nbRepeated::
 	ds $1
 
 ; Game stuff
-playerPosX::
-	ds $2
-playerSpeedX::
-	ds $2
-playerPosY::
-	ds $2
-playerSpeedY::
-	ds $2
-playerState::
-	ds $1
-playerAnim::
-	ds $1
-playerAnimCtr::
-	ds $1
-playerMapPtr::
-	ds $2
+player::
+	ds PLAYER_STRUCT_SIZE
+; All function manipulating the player perform 8bit additions to the low byte.
+; Would be a shame if it needed to carry to the high byte.
+ASSERT FATAL, HIGH(player) == HIGH(player + PLAYER_STRUCT_SIZE), "Player's address is invalid!"
 
 cameraX::
 	ds $2
